@@ -1,0 +1,39 @@
+flowchart TB
+    DEV["Developer on Linux Mint"] --> GIT["GitHub: systems-lab"]
+
+    subgraph MINT["Linux Mint Host"]
+        PG[("PostgreSQL 17<br/>Docker container")]
+        DATA["Persistent data<br/>/data/postgres"]
+        PG --> DATA
+    end
+
+    subgraph KVM["KVM Kubernetes Cluster"]
+        CP["k8s-cp01<br/>Control plane"]
+        W1["k8s-worker01"]
+        W2["k8s-worker02"]
+        CP --- W1
+        CP --- W2
+
+        subgraph KONG["Namespace: kong"]
+            JOB["Migration Job"]
+            GW["Kong Gateway Deployment"]
+            PS["Proxy Service"]
+            AS["Admin Service<br/>Internal only"]
+            JOB --> GW
+            PS --> GW
+            AS --> GW
+        end
+
+        KC["Keycloak<br/>Future workload"]
+        API["Sample API<br/>Future workload"]
+        PROM["Prometheus<br/>Future workload"]
+        GRAF["Grafana<br/>Future workload"]
+    end
+
+    CLIENT["Client / curl"] --> PS
+    GW -->|"PostgreSQL TCP 5432"| PG
+    KC -. "OIDC" .-> GW
+    GW --> API
+    PROM -. "Metrics" .-> GW
+    GRAF --> PROM
+    GIT -. "Reviewed manifests" .-> KONG

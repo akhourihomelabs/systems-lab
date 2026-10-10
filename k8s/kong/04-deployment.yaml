@@ -1,0 +1,2 @@
+# TODO: Kong Gateway Deployment.
+# Initial target: one replica, one container per Pod.
